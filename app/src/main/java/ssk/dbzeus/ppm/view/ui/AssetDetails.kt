@@ -6,13 +6,19 @@ import android.graphics.BitmapFactory
 import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.github.dhaval2404.imagepicker.ImagePicker
+import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_asset_details.*
+import kotlinx.android.synthetic.main.activity_login.*
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import org.angmarch.views.NiceSpinner
 import ssk.dbzeus.ppm.AppDb
 import ssk.dbzeus.ppm.R
@@ -20,8 +26,9 @@ import ssk.dbzeus.ppm.service.model.entity.asset.Assetworkorder
 import ssk.dbzeus.ppm.service.model.entity.asset.Frequencylang
 import ssk.dbzeus.ppm.service.model.entity.asset.Workingstatus
 import ssk.dbzeus.ppm.service.model.entity.insertdata.*
-import ssk.dbzeus.ppm.service.model.entity.userdata.UserInfo
 import ssk.dbzeus.ppm.service.model.entity.weekassets.AssetFrequencyDetailModel
+import ssk.dbzeus.ppm.service.repository.APIService
+import ssk.dbzeus.ppm.service.repository.RetrofitInstance
 import ssk.dbzeus.ppm.service.viewmodel.ObjectViewModel
 import ssk.dbzeus.ppm.utils.Utils
 import ssk.dbzeus.ppm.view.adapter.WorkOrderAdapter
@@ -32,7 +39,13 @@ import kotlin.collections.ArrayList
 
 
 open class AssetDetails : BaseActivity() {
+    companion object {
+        private const val BEFORE_IMAGE_REQ_CODE = 101
+        private const val AFTER_IMAGE_REQ_CODE = 102
+    }
 
+
+    private var mProfileFile: File? = null
     private var loginUserID: Int = 0
     lateinit var textWeek: TextView
     lateinit var textFreq: TextView
@@ -44,6 +57,7 @@ open class AssetDetails : BaseActivity() {
     lateinit var buttonBreakdown: Button
     lateinit var buttonBeforeImage: ImageView
     lateinit var buttonAfterImage: ImageView
+    lateinit var assetRemarks: EditText
     lateinit var Sigimgview: ImageView
     lateinit var llSignature: LinearLayout
     lateinit var spinnerStatus: NiceSpinner
@@ -56,7 +70,9 @@ open class AssetDetails : BaseActivity() {
     private lateinit var freqList: ArrayList<Frequencylang>
     private lateinit var statusList: ArrayList<Workingstatus>
     private val IMAGE_SIGNATURE = 700
-    private var SigantureString: String? = null
+    private var SigantureString: String? = ""
+    private var beforeImageString: String? = ""
+    private var afterImageString: String? = ""
     private lateinit var workOrderAdapter: WorkOrderAdapter
 
     @RequiresApi(Build.VERSION_CODES.M)
@@ -66,7 +82,7 @@ open class AssetDetails : BaseActivity() {
         initToolbar()
         setTitle("Asset Details")
         val bundle: Bundle? = intent.extras
-        val userInfo = bundle!!.getSerializable("UserInfo") as? UserInfo
+        //val userInfo = bundle!!.getSerializable("UserInfo") as? UserInfo
         selectedAsset = bundle!!.getSerializable("SelectedAsset") as AssetFrequencyDetailModel
         selectedWeek = bundle!!.getString("SelectedWeek").toString()
         freqList = bundle!!.getSerializable("FrequencyList") as ArrayList<Frequencylang>
@@ -81,6 +97,7 @@ open class AssetDetails : BaseActivity() {
         buttonBreakdown = findViewById(R.id.buttonBreakdown)
         buttonBeforeImage = findViewById(R.id.beforeImage)
         buttonAfterImage = findViewById(R.id.afterImage)
+        assetRemarks = findViewById(R.id.assetRemarks)
         Sigimgview = findViewById(R.id.Sigimgview)
         llSignature = findViewById(R.id.llSignature)
         submitButton = findViewById(R.id.buttonSubmit)
@@ -142,10 +159,20 @@ open class AssetDetails : BaseActivity() {
             startActivity(intent)
         }
         buttonBeforeImage.setOnClickListener {
-
+            ImagePicker.with(this)
+                .compress(1024)            //Final image size will be less than 1 MB(Optional)
+                .maxResultSize(
+                    1080,
+                    1080
+                )    //Final image resolution will be less than 1080 x 1080(Optional)
+                .start(BEFORE_IMAGE_REQ_CODE)
         }
         buttonAfterImage.setOnClickListener {
-
+            ImagePicker.with(this).maxResultSize(
+                1080,
+                1080
+            )    //Final image resolution will be less than 1080 x 1080(Optional)
+                .start(AFTER_IMAGE_REQ_CODE)
         }
         llSignature.setOnClickListener {
             Utils.newIntentWithResult(
@@ -160,7 +187,7 @@ open class AssetDetails : BaseActivity() {
             loginUserID = sharedPreferences.getInt("USERID", 0)
             workOrderAdapter.getAssetWorkOrderList();
             var arrayListItem: ArrayList<WorkorderListItem> = ArrayList()
-            var spareListitem: ArrayList<sparedataItem> = ArrayList()
+            var spareListitem: ArrayList<SpareDataItem> = ArrayList()
             for (assetWorkOrder in workOrderAdapter.getAssetWorkOrderList()) {
 
                 val workorderListItem = WorkorderListItem(
@@ -169,29 +196,111 @@ open class AssetDetails : BaseActivity() {
                 )
                 arrayListItem.add(workorderListItem)
             }
-            val workorderList = WorkorderList(arrayListItem)
-            val spareDataList = sparedata(spareListitem)
-            val finalData = FinalDBdata(
-                selectedAsset.assetFrequencyDetailId!!,
-                selectedAsset.assetFrequencyDetailKey!!,
-                "",
-                "",
-                loginUserID,
-                "",
-                "",
-                "",
-                workorderList,
-                spareDataList,
-                ""
-            )
-            AsyncTask.execute {
-                AppDb.getInstance(this).finalDataDao().insertSingle(
-                    finalData
+            var workorderList = WorkorderList(arrayListItem)
+            val spareDataList = SpareDataList(spareListitem)
+            if (Utils.checkInternet(applicationContext)) {
+                loading.visibility = View.VISIBLE
+                var convtWorkorderlst = workorderList.joinToString()
+                var convtSparedatalst = spareDataList.joinToString()
+                submitFinalApi(
+                    selectedAsset.assetFrequencyDetailId!!,
+                    selectedAsset.assetFrequencyDetailKey!!,
+                    "",
+                    assetRemarks.text.toString().trim(),
+                    loginUserID,
+                    beforeImageString!!,
+                    afterImageString!!,
+                    SigantureString!!,
+                    convtWorkorderlst,
+                    convtSparedatalst,
+                    ""
                 )
+            } else {
+                loading.visibility = View.GONE
+                val finalData = FinalDBdata(
+                    selectedAsset.assetFrequencyDetailId!!,
+                    selectedAsset.assetFrequencyDetailKey!!,
+                    "",
+                    "",
+                    loginUserID,
+                    beforeImageString!!,
+                    afterImageString!!,
+                    SigantureString!!,
+                    workorderList,
+                    spareDataList,
+                    ""
+                )
+                AsyncTask.execute {
+                    AppDb.getInstance(this).finalDataDao().insertSingle(
+                        finalData
+                    )
+                }
             }
+
         }
 
 
+    }
+
+    private fun submitFinalApi(
+        AssetFrequencyDetailId: Int,
+        AssetFrequencyDetailKey: String,
+        Description: String,
+        Remark: String,
+        LogInUserId: Int,
+        AssetBeforeMaintenanceImage: String,
+        AssetAfterMaintenanceImage: String,
+        AttachmentImage: String,
+        WorkOrderList: String,
+        SpareList: String,
+        AttachementName: String
+    ) {
+        val retIn = RetrofitInstance.getRetrofitInstance().create(APIService::class.java)
+        val requestBody: RequestBody = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("AssetFrequencyDetailId", AssetFrequencyDetailId.toString())
+            .addFormDataPart("AssetFrequencyDetailKey", AssetFrequencyDetailKey)
+            .addFormDataPart("Description", Description)
+            .addFormDataPart("Remark", Remark)
+            .addFormDataPart("LogInUserId", LogInUserId.toString())
+            .addFormDataPart("AssetBeforeMaintenanceImage", AssetBeforeMaintenanceImage)
+            .addFormDataPart("AssetAfterMaintenanceImage", AssetAfterMaintenanceImage)
+            .addFormDataPart("AttachmentImage", AttachmentImage)
+            .addFormDataPart("WorkOrderList", WorkOrderList)
+            .addFormDataPart("SpareList", SpareList)
+            .addFormDataPart("AttachementName", AttachementName)
+            .build()
+
+        retIn.submitAssetMaintanceApi(requestBody)
+            .enqueue(object : retrofit2.Callback<SubmitAssetMaintainceApiData> {
+                override fun onFailure(
+                    call: retrofit2.Call<SubmitAssetMaintainceApiData>,
+                    t: Throwable
+                ) {
+                    loading.visibility = View.GONE
+                }
+
+                override fun onResponse(
+                    call: retrofit2.Call<SubmitAssetMaintainceApiData>,
+                    response: retrofit2.Response<SubmitAssetMaintainceApiData>
+                ) {
+                    if (response.code() == 200) {
+                        response.body()?.message?.let {
+                            Toast.makeText(
+                                this@AssetDetails,
+                                response.body()!!.message.toString(),
+                                Toast.LENGTH_LONG
+                            )
+                        }
+                        loading.visibility = View.GONE
+                    } else {
+                        loading.visibility = View.GONE
+
+                        Toast.makeText(this@AssetDetails, "Data failed!", Toast.LENGTH_LONG)
+                            .show()
+                    }
+                }
+            })
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -204,7 +313,27 @@ open class AssetDetails : BaseActivity() {
                     val myBitmap = BitmapFactory.decodeFile(imgFile.absolutePath)
                     Sigimgview.setImageBitmap(myBitmap)
                     val imgSigntureba64 = Utils.bitmaptoBase(myBitmap)
-                    SigantureString = image_path
+                    SigantureString = imgSigntureba64
+                }
+            }
+            BEFORE_IMAGE_REQ_CODE -> {
+                val file = ImagePicker.getFile(data)!!
+                mProfileFile = file
+                Picasso.with(this).load(mProfileFile).into(beforeImage)
+                if (file.exists()) {
+                    val myBitmap = BitmapFactory.decodeFile(file.absolutePath)
+                    val imgSigntureba64 = Utils.bitmaptoBase(myBitmap)
+                    beforeImageString = imgSigntureba64
+                }
+            }
+            AFTER_IMAGE_REQ_CODE -> {
+                val file = ImagePicker.getFile(data)!!
+                mProfileFile = file
+                Picasso.with(this).load(mProfileFile).into(afterImage)
+                if (file.exists()) {
+                    val myBitmap = BitmapFactory.decodeFile(file.absolutePath)
+                    val imgSigntureba64 = Utils.bitmaptoBase(myBitmap)
+                    afterImageString = imgSigntureba64
                 }
             }
 

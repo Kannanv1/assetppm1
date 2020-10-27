@@ -95,4 +95,5 @@ dependencies {
     // permission handle
     implementation 'com.github.lolucosmin:PermissionsWrapper:version_1.5'
     implementation 'com.squareup.picasso:picasso:2.5.2'
+    implementation 'com.github.dhaval2404:imagepicker:1.7.5'
 }

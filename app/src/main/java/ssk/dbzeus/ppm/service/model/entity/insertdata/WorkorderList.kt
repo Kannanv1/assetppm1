@@ -8,15 +8,17 @@ import java.lang.reflect.Type
 
 @TypeConverters(WorkorderListConverter::class)
 class WorkorderList(arrayListItem: ArrayList<WorkorderListItem>) : ArrayList<WorkorderListItem>()
+
+
 class WorkorderListConverter {
     private var gson = Gson()
 
     @TypeConverter
-    fun listToJson(value: ArrayList<WorkorderList>?): String? = gson.toJson(value)
+    fun listToJson(value: ArrayList<WorkorderListItem>?): String? = gson.toJson(value)
 
     @TypeConverter
-    fun jsonToList(value: String): ArrayList<WorkorderList> {
-        val listType: Type = object : TypeToken<ArrayList<WorkorderList?>?>() {}.type
+    fun jsonToList(value: String): ArrayList<WorkorderListItem> {
+        val listType: Type = object : TypeToken<ArrayList<WorkorderListItem?>?>() {}.type
         return gson.fromJson(value, listType)
     }
 }
