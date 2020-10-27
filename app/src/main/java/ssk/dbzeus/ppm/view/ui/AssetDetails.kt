@@ -196,7 +196,7 @@ open class AssetDetails : BaseActivity() {
                 )
                 arrayListItem.add(workorderListItem)
             }
-            var workorderList = WorkorderList(arrayListItem)
+            val workorderList = WorkorderList(arrayListItem)
             val spareDataList = SpareDataList(spareListitem)
             if (Utils.checkInternet(applicationContext)) {
                 loading.visibility = View.VISIBLE
