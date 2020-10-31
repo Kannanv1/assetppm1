@@ -14,9 +14,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.dhaval2404.imagepicker.ImagePicker
+import com.google.gson.Gson
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_asset_details.*
-import kotlinx.android.synthetic.main.activity_login.*
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import org.angmarch.views.NiceSpinner
@@ -53,6 +53,7 @@ open class AssetDetails : BaseActivity() {
     lateinit var textAssetNo: EditText
     lateinit var textAssetName: EditText
     lateinit var submitButton: Button
+    lateinit var loading: ProgressBar
     private lateinit var assetStatus: EditText
     lateinit var buttonBreakdown: Button
     lateinit var buttonBeforeImage: ImageView
@@ -101,6 +102,7 @@ open class AssetDetails : BaseActivity() {
         Sigimgview = findViewById(R.id.Sigimgview)
         llSignature = findViewById(R.id.llSignature)
         submitButton = findViewById(R.id.buttonSubmit)
+        loading = findViewById(R.id.loading)
 
         recyclerWorkOrder = findViewById(R.id.recyclerWorkOrder)
         layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
@@ -200,8 +202,9 @@ open class AssetDetails : BaseActivity() {
             val spareDataList = SpareDataList(spareListitem)
             if (Utils.checkInternet(applicationContext)) {
                 loading.visibility = View.VISIBLE
-                var convtWorkorderlst = workorderList.joinToString()
-                var convtSparedatalst = spareDataList.joinToString()
+                val gson = Gson()
+                var convtWorkorderlsttoStrng = gson.toJson(workorderList)
+                var convtSparedatalsttoStrng = gson.toJson(spareDataList)
                 submitFinalApi(
                     selectedAsset.assetFrequencyDetailId!!,
                     selectedAsset.assetFrequencyDetailKey!!,
@@ -211,8 +214,8 @@ open class AssetDetails : BaseActivity() {
                     beforeImageString!!,
                     afterImageString!!,
                     SigantureString!!,
-                    convtWorkorderlst,
-                    convtSparedatalst,
+                    convtWorkorderlsttoStrng,
+                    convtSparedatalsttoStrng,
                     ""
                 )
             } else {
@@ -228,13 +231,34 @@ open class AssetDetails : BaseActivity() {
                     SigantureString!!,
                     workorderList,
                     spareDataList,
-                    ""
+                    "",
+                    "false"
                 )
                 AsyncTask.execute {
                     AppDb.getInstance(this).finalDataDao().insertSingle(
                         finalData
                     )
                 }
+            }
+            loading.visibility = View.GONE
+            val finalData = FinalDBdata(
+                selectedAsset.assetFrequencyDetailId!!,
+                selectedAsset.assetFrequencyDetailKey!!,
+                "",
+                "",
+                loginUserID,
+                beforeImageString!!,
+                afterImageString!!,
+                SigantureString!!,
+                workorderList,
+                spareDataList,
+                "",
+                "false"
+            )
+            AsyncTask.execute {
+                AppDb.getInstance(this).finalDataDao().insertSingle(
+                    finalData
+                )
             }
 
         }
@@ -316,7 +340,7 @@ open class AssetDetails : BaseActivity() {
                     SigantureString = imgSigntureba64
                 }
             }
-            BEFORE_IMAGE_REQ_CODE -> {
+            BEFORE_IMAGE_REQ_CODE -> if(resultCode== RESULT_OK){
                 val file = ImagePicker.getFile(data)!!
                 mProfileFile = file
                 Picasso.with(this).load(mProfileFile).into(beforeImage)
@@ -326,7 +350,7 @@ open class AssetDetails : BaseActivity() {
                     beforeImageString = imgSigntureba64
                 }
             }
-            AFTER_IMAGE_REQ_CODE -> {
+            AFTER_IMAGE_REQ_CODE -> if(resultCode== RESULT_OK){
                 val file = ImagePicker.getFile(data)!!
                 mProfileFile = file
                 Picasso.with(this).load(mProfileFile).into(afterImage)

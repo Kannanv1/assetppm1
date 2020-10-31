@@ -158,6 +158,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:autofillHints=""
+                        android:focusable="false"
                         android:hint="Remarks"
                         android:inputType="text"
                         android:minLines="3" />
@@ -232,8 +233,8 @@
                     android:orientation="horizontal">
 
                     <ImageView
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
                         android:layout_gravity="center_vertical"
                         android:layout_marginLeft="5dp"
                         android:layout_marginRight="5dp"
@@ -249,7 +250,25 @@
 
 
                 </LinearLayout>
+
             </RelativeLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true">
+
+                <ProgressBar
+                    android:id="@+id/loading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="12dp"
+                    android:visibility="gone"
+                    app:layout_constraintVertical_bias="0.3" />
+            </FrameLayout>
+
 
             <RelativeLayout
                 android:layout_width="wrap_content"
@@ -273,6 +292,7 @@
                     android:layout_below="@+id/labelWorkorder" />
 
             </RelativeLayout>
+
         </RelativeLayout>
     </ScrollView>
 
@@ -289,4 +309,6 @@
         android:textColor="@color/colorAccentWhite"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

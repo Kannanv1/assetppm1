@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "5c8e7c80104e0782fed0248f9ccfd619",
+    "identityHash": "99579ad7d757686f8b7100a6922406f4",
     "entities": [
       {
         "tableName": "UserInfo",
@@ -1804,7 +1804,7 @@
       },
       {
         "tableName": "FinalDBdata",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`AssetFrequencyDetailId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `AssetFrequencyDetailKey` TEXT NOT NULL, `Description` TEXT NOT NULL, `Remark` TEXT NOT NULL, `LogInUserId` INTEGER NOT NULL, `AssetBeforeMaintenanceImage` TEXT NOT NULL, `AssetAfterMaintenanceImage` TEXT NOT NULL, `AttachmentImage` TEXT NOT NULL, `WorkOrderList` TEXT NOT NULL, `SpareList` TEXT NOT NULL, `AttachementName` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`AssetFrequencyDetailId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `AssetFrequencyDetailKey` TEXT NOT NULL, `Description` TEXT NOT NULL, `Remark` TEXT NOT NULL, `LogInUserId` INTEGER NOT NULL, `AssetBeforeMaintenanceImage` TEXT NOT NULL, `AssetAfterMaintenanceImage` TEXT NOT NULL, `AttachmentImage` TEXT NOT NULL, `WorkOrderList` TEXT NOT NULL, `SpareList` TEXT NOT NULL, `AttachementName` TEXT NOT NULL, `IsSyncOrNot` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "AssetFrequencyDetailId",
@@ -1871,6 +1871,12 @@
             "columnName": "AttachementName",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "IsSyncOrNota",
+            "columnName": "IsSyncOrNot",
+            "affinity": "TEXT",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -1886,7 +1892,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5c8e7c80104e0782fed0248f9ccfd619')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '99579ad7d757686f8b7100a6922406f4')"
     ]
   }
 }

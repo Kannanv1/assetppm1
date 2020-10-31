@@ -66,7 +66,7 @@ public class SignatureActivity extends AppCompatActivity {
         mCancel.setOnClickListener(onButtonClick);
 
         // Method to create Directory, if the Directory doesn't exists
-        String folder_main = "ASSETBBM";
+        String folder_main = "AssetPPM";
 
         File f = new File(Environment.getExternalStorageDirectory(), folder_main);
         if (!f.exists()) {

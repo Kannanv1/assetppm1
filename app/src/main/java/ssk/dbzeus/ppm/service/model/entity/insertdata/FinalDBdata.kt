@@ -20,6 +20,7 @@ data class FinalDBdata(
     @ColumnInfo(name = "WorkOrderList") val WorkOrderList: WorkorderList,
     @ColumnInfo(name = "SpareList") val SpareList: SpareDataList,
     @ColumnInfo(name = "AttachementName") val AttachementName: String,
+    @ColumnInfo(name = "IsSyncOrNot") val IsSyncOrNota: String,
 )
 
 class WorkorderConverter {
