@@ -1,11 +1,13 @@
 package ssk.dbzeus.ppm.view.ui
 
+import android.animation.LayoutTransition
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
 import androidx.annotation.RequiresApi
@@ -15,6 +17,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.google.gson.Gson
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_asset_details.*
 import okhttp3.MultipartBody
@@ -61,6 +65,11 @@ open class AssetDetails : BaseActivity() {
     lateinit var assetRemarks: EditText
     lateinit var Sigimgview: ImageView
     lateinit var llSignature: LinearLayout
+    lateinit var spareadd: ImageView
+    lateinit var sparecontainer: LinearLayout
+    lateinit var sparetextin: EditText
+    lateinit var sparecost: EditText
+    lateinit var spareqty: EditText
     lateinit var spinnerStatus: NiceSpinner
     private lateinit var objectViewModel: ObjectViewModel
 
@@ -103,6 +112,11 @@ open class AssetDetails : BaseActivity() {
         llSignature = findViewById(R.id.llSignature)
         submitButton = findViewById(R.id.buttonSubmit)
         loading = findViewById(R.id.loading)
+        spareadd=findViewById(R.id.spareadd);
+        sparecontainer=findViewById(R.id.sparecontainer);
+        sparetextin=findViewById(R.id.sparetextin);
+        sparecost=findViewById(R.id.sparecost);
+        spareqty=findViewById(R.id.spareqty);
 
         recyclerWorkOrder = findViewById(R.id.recyclerWorkOrder)
         layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
@@ -184,6 +198,37 @@ open class AssetDetails : BaseActivity() {
                 IMAGE_SIGNATURE
             )
         }
+        spareadd.setOnClickListener(View.OnClickListener {
+            if (!sparetextin.getText().toString().isEmpty() && !sparecost.getText().toString()
+                    .isEmpty() && !spareqty.getText().toString().isEmpty()
+            ) {
+                val layoutInflater =
+                    baseContext.getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
+                val addView: View = layoutInflater.inflate(R.layout.sparerow, null)
+                val sparetextOut = addView.findViewById<View>(R.id.sparetextout) as TextView
+                val sparetextoutqty = addView.findViewById<View>(R.id.sparetextoutqty) as TextView
+                val sparetextoutcost = addView.findViewById<View>(R.id.sparetextoutcost) as TextView
+                sparetextOut.setText(sparetextin.getText().toString())
+                sparetextoutqty.setText(spareqty.getText().toString())
+                sparetextoutcost.setText(sparecost.getText().toString())
+                sparetextin.setText("")
+                spareqty.setText("")
+                sparecost.setText("")
+                val sparebuttonRemove = addView.findViewById<View>(R.id.spareremove) as ImageView
+                sparebuttonRemove.setOnClickListener {
+                    (addView.parent as LinearLayout).removeView(
+                        addView
+                    )
+                }
+                sparecontainer.addView(addView, 0)
+            } else {
+                Toast.makeText(this, "Enter spare,cost,qty", Toast.LENGTH_LONG).show()
+            }
+        })
+        val transition1 = LayoutTransition()
+        sparecontainer.setLayoutTransition(transition1)
+
+
         submitButton.setOnClickListener {
             val sharedPreferences = getSharedPreferences("ASSETBBM", Context.MODE_PRIVATE)
             loginUserID = sharedPreferences.getInt("USERID", 0)
@@ -199,6 +244,23 @@ open class AssetDetails : BaseActivity() {
                 arrayListItem.add(workorderListItem)
             }
             val workorderList = WorkorderList(arrayListItem)
+            val spareSize: Int = sparecontainer.getChildCount()
+            val sparejsonElement = JsonArray()
+            for (j in 0 until spareSize) {
+                val view1: View = sparecontainer.getChildAt(j)
+                val text = view1.findViewById<TextView>(R.id.sparetextout)
+                val qty = view1.findViewById<TextView>(R.id.sparetextoutqty)
+                val cost = view1.findViewById<TextView>(R.id.sparetextoutcost)
+                val jsonObject = JsonObject()
+                jsonObject.addProperty("Spare", text.text.toString())
+                jsonObject.addProperty("Qty", qty.text.toString())
+                jsonObject.addProperty("Cost", cost.text.toString())
+                sparejsonElement.add(jsonObject)
+            }
+            val gson = Gson()
+            val sparearray: String = gson.toJson(sparejsonElement)
+
+
             val spareDataList = SpareDataList(spareListitem)
             if (Utils.checkInternet(applicationContext)) {
                 loading.visibility = View.VISIBLE
@@ -340,7 +402,7 @@ open class AssetDetails : BaseActivity() {
                     SigantureString = imgSigntureba64
                 }
             }
-            BEFORE_IMAGE_REQ_CODE -> if(resultCode== RESULT_OK){
+            BEFORE_IMAGE_REQ_CODE -> if (resultCode == RESULT_OK) {
                 val file = ImagePicker.getFile(data)!!
                 mProfileFile = file
                 Picasso.with(this).load(mProfileFile).into(beforeImage)
@@ -350,7 +412,7 @@ open class AssetDetails : BaseActivity() {
                     beforeImageString = imgSigntureba64
                 }
             }
-            AFTER_IMAGE_REQ_CODE -> if(resultCode== RESULT_OK){
+            AFTER_IMAGE_REQ_CODE -> if (resultCode == RESULT_OK) {
                 val file = ImagePicker.getFile(data)!!
                 mProfileFile = file
                 Picasso.with(this).load(mProfileFile).into(afterImage)

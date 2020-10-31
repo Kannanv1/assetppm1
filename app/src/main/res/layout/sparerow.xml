@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/spareremove"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/ic_bin" />
+
+        <TextView
+            android:id="@+id/sparetextoutqty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="5dp"
+            android:layout_toStartOf="@id/spareremove"
+            android:gravity="center_vertical"
+            android:minHeight="35dp"
+            android:text="" />
+        <TextView
+            android:id="@+id/sparetextoutcost"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="5dp"
+            android:layout_toStartOf="@id/sparetextoutqty"
+            android:gravity="center_vertical"
+            android:minHeight="35dp"
+            android:text="" />
+
+        <TextView
+            android:id="@+id/sparetextout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="5dp"
+            android:layout_toStartOf="@id/sparetextoutqty"
+            android:gravity="center_vertical"
+            android:minHeight="35dp"
+            android:text="" />
+
+
+    </RelativeLayout>
+
+</layout>

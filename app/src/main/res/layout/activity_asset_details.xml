@@ -165,10 +165,84 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <LinearLayout
-                    android:id="@+id/txtParant"
+                    android:id="@+id/parantspare"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/textInputAssetRemarks"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginBottom="20dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <EditText
+                            android:id="@+id/sparetextin"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="1"
+                            android:hint="Spare"
+                            android:minHeight="35dp"
+                            android:paddingLeft="15dp"
+                            android:paddingRight="15dp"
+                            android:textColor="@color/colorAccentBlack"
+                            android:textSize="12sp" />
+
+                        <EditText
+                            android:id="@+id/sparecost"
+                            android:layout_width="60dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:digits="0123456789."
+                            android:hint="cost"
+                            android:inputType="phone"
+                            android:maxLength="8"
+                            android:minHeight="35dp"
+                            android:paddingLeft="15dp"
+                            android:paddingRight="15dp"
+                            android:textColor="@color/colorAccentBlack"
+                            android:textSize="12sp" />
+
+                        <EditText
+                            android:id="@+id/spareqty"
+                            android:layout_width="60dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:digits="0123456789."
+                            android:hint="qty"
+                            android:inputType="phone"
+                            android:maxLength="6"
+                            android:minHeight="35dp"
+                            android:paddingLeft="15dp"
+                            android:paddingRight="15dp"
+                            android:textColor="@color/colorAccentBlack"
+                            android:textSize="12sp" />
+
+                        <ImageView
+                            android:id="@+id/spareadd"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginEnd="8dp"
+                            android:src="@drawable/ic_add"
+                            android:text="Add" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/sparecontainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/txtParant"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/parantspare"
                     android:orientation="horizontal">
 
                     <TextView
