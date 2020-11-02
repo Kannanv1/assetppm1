@@ -29,7 +29,7 @@ import ssk.dbzeus.ppm.utils.Converters
         (Asset::class), (Assetsmap::class), (Category::class), (Categorylang::class),
         (Subcategory::class), (Subcategorylang::class), (Detail::class), (Frequency::class),
         (Frequencylang::class), (Workingstatus::class), (Assetworkorder::class), FinalDBdata::class],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 @TypeConverters(Converters::class)

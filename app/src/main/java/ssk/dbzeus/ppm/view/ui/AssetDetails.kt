@@ -244,25 +244,47 @@ open class AssetDetails : BaseActivity() {
                 arrayListItem.add(workorderListItem)
             }
             val workorderList = WorkorderList(arrayListItem)
-            val spareSize: Int = sparecontainer.getChildCount()
+
+            val spareSize: Int = sparecontainer.childCount
             val sparejsonElement = JsonArray()
             for (j in 0 until spareSize) {
                 val view1: View = sparecontainer.getChildAt(j)
                 val text = view1.findViewById<TextView>(R.id.sparetextout)
                 val qty = view1.findViewById<TextView>(R.id.sparetextoutqty)
                 val cost = view1.findViewById<TextView>(R.id.sparetextoutcost)
+/*
                 val jsonObject = JsonObject()
                 jsonObject.addProperty("Spare", text.text.toString())
                 jsonObject.addProperty("Qty", qty.text.toString())
                 jsonObject.addProperty("Cost", cost.text.toString())
-                sparejsonElement.add(jsonObject)
+                sparejsonElement.add(jsonObject)*/
+                spareListitem.add( SpareDataItem (cost.text.toString(),qty.text.toString(),text.text.toString()))
             }
             val gson = Gson()
             val sparearray: String = gson.toJson(sparejsonElement)
 
 
             val spareDataList = SpareDataList(spareListitem)
-            if (Utils.checkInternet(applicationContext)) {
+            val finalData = FinalDBdata(
+                selectedAsset.assetFrequencyDetailId!!,
+                selectedAsset.assetFrequencyDetailKey!!,
+                "",
+                "",
+                loginUserID,
+                beforeImageString!!,
+                afterImageString!!,
+                SigantureString!!,
+                workorderList,
+                spareDataList,
+                "Test1",
+                "false"
+            )
+            AsyncTask.execute {
+                AppDb.getInstance(this).finalDataDao().insertSingle(
+                    finalData
+                )
+            }
+           /* if (Utils.checkInternet(applicationContext)) {
                 loading.visibility = View.VISIBLE
                 val gson = Gson()
                 var convtWorkorderlsttoStrng = gson.toJson(workorderList)
@@ -301,8 +323,8 @@ open class AssetDetails : BaseActivity() {
                         finalData
                     )
                 }
-            }
-            loading.visibility = View.GONE
+            }*/
+           /* loading.visibility = View.GONE
             val finalData = FinalDBdata(
                 selectedAsset.assetFrequencyDetailId!!,
                 selectedAsset.assetFrequencyDetailKey!!,
@@ -321,7 +343,7 @@ open class AssetDetails : BaseActivity() {
                 AppDb.getInstance(this).finalDataDao().insertSingle(
                     finalData
                 )
-            }
+            }*/
 
         }
 

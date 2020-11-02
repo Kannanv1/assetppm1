@@ -7,7 +7,11 @@ import com.google.gson.reflect.TypeToken
 import java.lang.reflect.Type
 
 @TypeConverters(WorkorderListConverter::class)
-class WorkorderList(arrayListItem: ArrayList<WorkorderListItem>) : ArrayList<WorkorderListItem>()
+
+
+data class WorkorderList(
+    val WorkorderListItem: ArrayList<WorkorderListItem>
+)
 
 
 class WorkorderListConverter {
